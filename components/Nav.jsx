@@ -8,6 +8,7 @@ const links = [
   ['Services', '#services'],
   ['Process', '#process'],
   ['Why Bitlabs', '#why'],
+  ['Projects', '#projects'],
   ['Work', '#testimonials'],
 ]
 
