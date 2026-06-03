@@ -1,5 +1,6 @@
 import { Jost } from 'next/font/google'
 import './globals.css'
+import { SmoothScroll } from '@/components/SmoothScroll'
 
 const jost = Jost({
   subsets: ['latin'],
@@ -17,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={jost.variable}>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning><SmoothScroll>{children}</SmoothScroll></body>
     </html>
   )
 }
