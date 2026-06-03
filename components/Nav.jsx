@@ -10,6 +10,7 @@ const links = [
   ['Why Bitlabs', '#why'],
   ['Projects', '#projects'],
   ['Work', '#testimonials'],
+  ['Founder', '/founder'],
 ]
 
 export function Nav() {
