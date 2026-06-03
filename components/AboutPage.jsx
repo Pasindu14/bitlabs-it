@@ -445,7 +445,7 @@ export function AboutPage() {
           viewport={{ once: true }}
           transition={{ duration: 1, ease: EASE }}
         >
-          <span className="ab-eyebrow" style={{ color: 'var(--on-dark-40)' }}>08 — Contact</span>
+          <span className="ab-eyebrow">08 — Contact</span>
           <a href="mailto:bitlabs.solutions@gmail.com" className="ab-cta-link">
             Let's build something.
             <span className="ab-cta-arr">↗</span>
