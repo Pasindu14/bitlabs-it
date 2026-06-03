@@ -13,6 +13,10 @@ const jost = Jost({
 export const metadata = {
   title: 'Bitlabs — Software Studio · Sri Lanka',
   description: 'Bitlabs crafts innovative software solutions for businesses in Sri Lanka and beyond — mobile apps, web platforms, AI and custom software.',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({ children }) {
