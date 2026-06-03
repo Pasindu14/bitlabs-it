@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Magnetic } from './Magnetic'
 import { ArrowR } from './ArrowR'
@@ -15,6 +16,11 @@ const links = [
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+
+  // Prefix anchor links with '/' when not on the home page
+  const href = (h) => h.startsWith('#') && !isHome ? '/' + h : h
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 24)
@@ -31,7 +37,7 @@ export function Nav() {
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
     >
       <div className="nav-pill">
-        <a className="brand" href="#top">
+        <a className="brand" href="/">
           <span className="brand-mark"><span /></span>
           <span className="brand-word">Bit<b>labs</b></span>
         </a>
@@ -41,11 +47,11 @@ export function Nav() {
         </span>
         <div className="nav-rule" />
         <div className="nav-links">
-          {links.map(([t, h]) => <a key={t} href={h}>{t}</a>)}
+          {links.map(([t, h]) => <a key={t} href={href(h)}>{t}</a>)}
         </div>
         <div className="nav-cta">
           <Magnetic>
-            <a className="btn btn-primary btn-sm" href="#contact">
+            <a className="btn btn-primary btn-sm" href={href('#contact')}>
               Get in Touch <ArrowR s={16} />
             </a>
           </Magnetic>
