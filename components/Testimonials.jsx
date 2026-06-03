@@ -14,6 +14,12 @@ const items = [
   { quote: 'Pasi and the team delivered exactly what we envisioned — on time, on budget, and with zero drama. Exceptional work.', name: 'Pete Fry', initials: 'PF', bg: 'orange' },
   { quote: 'Came back a second time because the first project was that good. Consistent quality, great communication every step of the way.', name: 'anthonybbaer', initials: 'AB' },
   { quote: 'High-value project handled with complete professionalism. Delivered exactly to spec and went the extra mile without being asked.', name: 'juliantrading', initials: 'JT', bg: 'dark' },
+  { quote: 'Impressive output for a complex build. The work was clean, well-structured, and finished ahead of time. Left a tip because it deserved one.', name: 'leonsceco', initials: 'LS', bg: 'orange' },
+  { quote: 'Largest project I\'ve commissioned on Fiverr and it was handled better than any agency I\'ve worked with. Will absolutely be back.', name: 'taraslucysyn', initials: 'TL' },
+  { quote: 'Solid execution on a detailed brief. The app worked first try, no revisions needed. Rare to find that level of precision.', name: 'o3books', initials: 'OB', bg: 'dark' },
+  { quote: 'Dependable, talented, and fast. Came back multiple times and the standard never dropped once.', name: 'typeseo', initials: 'TS' },
+  { quote: 'Trusted this developer with a substantial budget and it paid off completely. Exceptional value and craftsmanship.', name: 'john3m', initials: 'JM', bg: 'orange' },
+  { quote: 'Kept coming back because every single delivery was clean, on time and better than expected. A genuinely rare find on any platform.', name: 'alessandrobu576', initials: 'AL' },
 ]
 
 export function Testimonials() {

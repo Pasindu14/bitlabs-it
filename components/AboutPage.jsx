@@ -510,36 +510,6 @@ export function AboutPage() {
         </div>
       </section>
 
-      {/* ─── AFFILIATIONS ─────────────────────────────────── */}
-      <section className="ab-section">
-        <div className="ab-section-wrap">
-          <motion.header
-            className="ab-section-hd"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <span className="ab-num">07</span>
-            <div className="ab-rule" />
-            <span className="ab-eyebrow">Affiliations</span>
-          </motion.header>
-
-          <motion.div
-            className="ab-affiliations"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: EASE }}
-          >
-            <div className="ab-affil">
-              <span className="ab-affil-name">The Australian Computer Society</span>
-              <span className="ab-affil-detail">Migration Skills Assessment · EA ID: 4396724</span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* ─── CTA ──────────────────────────────────────────── */}
       <section className="ab-cta">
         <motion.div
@@ -549,7 +519,7 @@ export function AboutPage() {
           viewport={{ once: true }}
           transition={{ duration: 1, ease: EASE }}
         >
-          <span className="ab-eyebrow">08 — Contact</span>
+          <span className="ab-eyebrow">07 — Contact</span>
           <a href="mailto:bitlabs.solutions@gmail.com" className="ab-cta-link">
             Let's build something.
             <span className="ab-cta-arr">↗</span>
