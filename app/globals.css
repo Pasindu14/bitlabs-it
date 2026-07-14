@@ -308,13 +308,145 @@ h1, h2, h3 { font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; }
 .marquee-item .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--orange); flex: none; }
 .marquee-item .ghost { color: var(--ink-40); }
 
-/* ---------- Trust / stats ---------- */
-.trust { background: var(--bg); }
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 54px; }
-.stat { border-top: 1px solid var(--ink-12); padding-top: 22px; }
-.stat .num { font-size: clamp(46px, 6vw, 82px); font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
-.stat .num .suffix { color: var(--orange); }
-.stat .label { margin-top: 12px; font-size: 15px; color: var(--ink-60); max-width: 18ch; }
+/* ---------- Trust — "The Proof Ledger" ---------- */
+.trust { background: var(--bg); overflow: clip; }
+.trust .wrap { position: relative; z-index: 1; }
+
+/* Ambient glow drift behind the ledger (Pattern 20) */
+.trust-glow {
+  position: absolute;
+  top: 42%;
+  left: 8%;
+  width: clamp(320px, 42vw, 620px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,77,0,0.14), rgba(255,77,0,0) 62%);
+  filter: blur(20px);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform, opacity;
+}
+
+.trust-head {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(28px, 5vw, 80px);
+  align-items: end;
+}
+.trust-head-lead { min-width: 0; }
+.trust-title { margin-top: 22px; }
+.trust-title .line-mask { display: block; overflow: hidden; padding-bottom: 0.08em; }
+.trust-title .line-mask > span { display: block; will-change: transform; }
+
+/* Scroll reading-highlight statement (Pattern 09) */
+.trust-statement {
+  font-size: clamp(19px, 1.85vw, 26px);
+  font-weight: 400;
+  line-height: 1.42;
+  letter-spacing: -0.012em;
+  max-width: 30ch;
+  padding-bottom: 4px;
+}
+.trust-statement > span { display: inline; }
+
+/* ----- Ledger ----- */
+.ledger {
+  margin-top: clamp(56px, 8vw, 104px);
+  position: relative;
+}
+.ledger-top {
+  display: block;
+  height: 1px;
+  background: var(--ink);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.ledger-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(150px, 0.9fr) minmax(60px, 1.6fr) minmax(200px, 1.1fr);
+  align-items: center;
+  gap: clamp(16px, 3vw, 44px);
+  padding-block: clamp(24px, 3.4vw, 40px);
+}
+/* Orange wash sweeps in on hover */
+.ledger-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px;
+  background: linear-gradient(90deg, rgba(255,77,0,0.06), rgba(255,77,0,0) 70%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease);
+  z-index: -1;
+}
+.ledger-row:hover::before { transform: scaleX(1); }
+
+.ledger-index {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--ink-40);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.4s var(--ease);
+  will-change: transform, opacity;
+}
+.ledger-row:hover .ledger-index { color: var(--orange); }
+
+.ledger-num-wrap {
+  transition: transform 0.5s var(--ease);
+  will-change: transform;
+}
+.ledger-row:hover .ledger-num-wrap { transform: translateX(8px); }
+.ledger-num-mask { display: inline-block; overflow: hidden; padding-bottom: 0.06em; }
+.ledger-num {
+  display: inline-block;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 200;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  white-space: nowrap;
+  will-change: transform;
+}
+.ledger-num-val { font-variant-numeric: tabular-nums; }
+.ledger-suffix { color: var(--orange); font-weight: 300; }
+
+.ledger-connector {
+  display: block;
+  height: 1px;
+  background: var(--ink-06);
+  overflow: hidden;
+}
+.ledger-connector-fill {
+  display: block;
+  height: 100%;
+  background: var(--ink-12);
+  transform-origin: left center;
+  transition: background 0.4s var(--ease);
+  will-change: transform;
+}
+.ledger-row:hover .ledger-connector-fill { background: var(--orange); }
+
+.ledger-label {
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.4;
+  color: var(--ink-60);
+  max-width: 26ch;
+  will-change: transform, opacity;
+}
+
+.ledger-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--ink-12);
+  transform-origin: left center;
+  will-change: transform;
+}
 
 /* ---------- Services ---------- */
 .services-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; flex-wrap: wrap; }
@@ -1275,7 +1407,11 @@ h1, h2, h3 { font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; }
   .hero-orbit { display: none; }
   .hero-sub { align-items: flex-start; gap: 32px; }
   .services-head { flex-direction: column; align-items: flex-start; gap: 24px; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 36px 24px; }
+  .trust-head { grid-template-columns: 1fr; gap: 28px; }
+  .trust-statement { max-width: 46ch; }
+  /* Ledger: drop the connector column, keep index · number · label */
+  .ledger-row { grid-template-columns: 44px minmax(120px, auto) 1fr; }
+  .ledger-connector { display: none; }
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
   .t-grid { grid-template-columns: 1fr 1fr; }
   .tcard.feature { grid-column: span 2; }
@@ -1307,7 +1443,17 @@ h1, h2, h3 { font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; }
   .t-grid { grid-template-columns: 1fr; }
   .tcard.feature { grid-column: span 1; }
   .tcard { padding: 24px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
+  /* Ledger: number row on top, label beneath */
+  .ledger-row {
+    grid-template-columns: 40px 1fr;
+    grid-template-areas: "index num" ". label";
+    gap: 6px 16px;
+    align-items: baseline;
+  }
+  .ledger-index { grid-area: index; }
+  .ledger-num-wrap { grid-area: num; }
+  .ledger-label { grid-area: label; max-width: none; margin-top: 4px; }
+  .ledger-row:hover .ledger-num-wrap { transform: none; }
   .step { padding: 24px 20px; }
   .step-idx { font-size: clamp(52px, 14vw, 80px); }
   .why-visual { aspect-ratio: unset; height: auto; padding: 28px; }
