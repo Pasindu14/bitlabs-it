@@ -1,8 +1,22 @@
 'use client'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Magnetic } from './Magnetic'
 import { ArrowR } from './ArrowR'
+import { Marquee } from './Marquee'
+
+// "Bit by Bit": thousands of cubes that assemble into what we build. Client-only and heavy —
+// keep it out of the server render and the first paint.
+const BitsScene = dynamic(() => import('./hero3d/bits/BitsScene'), { ssr: false })
+
+const SCENE_LABELS = [
+  ['Bitlabs', 'Software studio · Sri Lanka'],
+  ['Mobile apps', 'Flutter · iOS & Android'],
+  ['Sales dashboards', 'SFA · field sales automation'],
+  ['HR platforms', 'HRIS · people & org charts'],
+  ['WhatsApp SaaS', 'Conversational business tools'],
+]
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -28,51 +42,16 @@ function WordReveal({ text, className = '', delay = 0 }) {
 export function Hero() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, 160])
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -120])
   const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-  const orbitY = useTransform(scrollYProgress, [0, 1], [0, 220])
+  const control = useRef(null)
+  const [scene, setScene] = useState(0)
 
   return (
-    <header className="hero" id="top" ref={ref}>
+    <header className="hero hero--bits" id="top" ref={ref}>
       <div className="hero-bg">
-        <motion.div
-          className="blob b1"
-          style={{ y: y1 }}
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="blob b2"
-          style={{ y: y2 }}
-          animate={{ scale: [1, 1.12, 1] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <div className="grid-lines" />
+        <BitsScene heroRef={ref} control={control} onScene={(i) => setScene(i)} />
+        <div className="hero-scrim" />
       </div>
-
-      <motion.div className="hero-orbit" style={{ y: orbitY }}>
-        <motion.div
-          className="orbit-ring"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
-        >
-          <span className="orbit-dot" />
-        </motion.div>
-        <motion.div
-          className="orbit-ring r2"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-        >
-          <span className="orbit-dot" style={{ background: '#111' }} />
-        </motion.div>
-        <div className="orbit-core">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="16 18 22 12 16 6" />
-            <polyline points="8 6 2 12 8 18" />
-          </svg>
-        </div>
-      </motion.div>
 
       <motion.div className="wrap hero-inner" style={{ opacity: fade }}>
         <motion.span
@@ -124,6 +103,33 @@ export function Hero() {
           </motion.div>
         </div>
       </motion.div>
+      <motion.div
+        className="bits-caption"
+        style={{ opacity: fade }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.4, duration: 0.8, ease: EASE }}
+      >
+        <span className="bits-caption-kicker">Now building</span>
+        <span className="bits-caption-title" key={scene}>{SCENE_LABELS[scene][0]}</span>
+        <span className="bits-caption-sub" key={'s' + scene}>{SCENE_LABELS[scene][1]}</span>
+        <div className="bits-dots" role="tablist" aria-label="What we build">
+          {SCENE_LABELS.map(([name], i) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              aria-selected={i === scene}
+              aria-label={name}
+              className={'bits-dot' + (i === scene ? ' on' : '')}
+              onClick={() => control.current?.goTo(i)}
+            />
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Service ticker lives on the hero's bottom edge */}
+      <Marquee />
     </header>
   )
 }

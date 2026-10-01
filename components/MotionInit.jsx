@@ -75,28 +75,6 @@ export function MotionInit() {
         )
       })
 
-      const how = document.querySelector('[data-how]')
-      const htrack = document.querySelector('[data-how-track]')
-      const hbar = document.querySelector('[data-how-bar]')
-      if (how && htrack && window.innerWidth >= 768) {
-        const getScroll = () => htrack.scrollWidth - htrack.parentElement.offsetWidth + 40
-        gsap.to(htrack, {
-          x: () => -getScroll(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: how,
-            start: 'top top',
-            end: () => '+=' + (getScroll() + window.innerHeight * 0.4),
-            pin: '.how-pin',
-            scrub: 1,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              if (hbar) hbar.style.width = (self.progress * 100).toFixed(1) + '%'
-            },
-          },
-        })
-      }
-
       ScrollTrigger.refresh()
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => ScrollTrigger.refresh())
@@ -114,11 +92,6 @@ export function MotionInit() {
         document.querySelectorAll('[style*="opacity"], [style*="transform"]').forEach((el) => {
           el.style.opacity = ''
           el.style.transform = ''
-        })
-        document.querySelectorAll('.scroll-curve-arrow path, .scroll-curve-arrow line').forEach((el) => {
-          el.style.strokeDashoffset = '0'
-          el.style.strokeDasharray = ''
-          el.style.opacity = '0.9'
         })
         document.querySelectorAll('[data-counter]').forEach((el) => {
           el.innerHTML =

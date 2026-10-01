@@ -1,6 +1,11 @@
 'use client'
+import { useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { Reveal } from './Reveal'
+
+// Live 3D voxel icons for the cards (one shared canvas) — client-only, lazy.
+const ServiceIcons = dynamic(() => import('./hero3d/services/ServiceIcons'), { ssr: false })
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -74,6 +79,7 @@ function ServiceCard({ item, i }) {
 }
 
 export function Services() {
+  const grid = useRef(null)
   return (
     <section className="section-pad" id="services">
       <div className="wrap">
@@ -92,8 +98,9 @@ export function Services() {
             </p>
           </Reveal>
         </div>
-        <div className="cards-grid">
+        <div className="cards-grid" ref={grid}>
           {data.map((d, i) => <ServiceCard item={d} i={i} key={i} />)}
+          <ServiceIcons gridRef={grid} />
         </div>
       </div>
     </section>

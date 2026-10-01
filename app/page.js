@@ -1,8 +1,7 @@
 import { ScrollProgress } from '@/components/ScrollProgress'
-import { ScrollCurveArrow } from '@/components/ScrollCurveArrow'
+import { ScrollBits } from '@/components/ScrollBits'
 import { Nav } from '@/components/Nav'
 import { Hero } from '@/components/Hero'
-import { Marquee } from '@/components/Marquee'
 import { Trust } from '@/components/Trust'
 import { Services } from '@/components/Services'
 import { HowWeWork } from '@/components/HowWeWork'
@@ -18,11 +17,10 @@ export default function Home() {
   return (
     <>
       <ScrollProgress />
-      <ScrollCurveArrow />
+      <ScrollBits />
       <Nav />
       <main>
         <Hero />
-        <Marquee />
         <Trust />
         <Services />
         <HowWeWork />

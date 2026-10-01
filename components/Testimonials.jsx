@@ -1,5 +1,10 @@
 'use client'
+import { useRef } from 'react'
+import dynamic from 'next/dynamic'
 import { Reveal } from './Reveal'
+
+// A quiet dotted globe beside the heading — client-only, lazy.
+const GlobeScene = dynamic(() => import('./hero3d/globe/GlobeScene'), { ssr: false })
 
 const items = [
   { quote: 'Bitlabs took our messy internal process and turned it into software our whole team actually enjoys using. Genuinely the most reliable dev partner we\'ve worked with.', name: 'Nimal Perera', initials: 'NP', bg: 'dark' },
@@ -23,6 +28,7 @@ const items = [
 ]
 
 export function Testimonials() {
+  const globe = useRef(null)
   return (
     <section className="section-pad" id="testimonials" style={{ background: 'var(--bg-2)' }}>
       <div className="wrap">
@@ -35,6 +41,12 @@ export function Testimonials() {
               </h2>
             </Reveal>
           </div>
+          <Reveal delay={0.1}>
+            <div className="t-globe" ref={globe}>
+              <GlobeScene boxRef={globe} />
+              <span className="t-globe-cap"><i /> Sri Lanka &amp; beyond</span>
+            </div>
+          </Reveal>
         </div>
         <div className="t-grid">
           {items.map((t, i) => (

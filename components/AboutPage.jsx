@@ -1,7 +1,11 @@
 'use client'
 import { useRef, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import gsap from 'gsap'
+
+// The Japanese-minka dusk scene (procedural Three.js) — client-only, loaded lazily.
+const HeroScene = dynamic(() => import('./hero3d/HeroScene'), { ssr: false })
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -172,7 +176,13 @@ export function AboutPage() {
       <div ref={orbRef} className="ab-orb" aria-hidden />
 
       {/* ─── HERO ─────────────────────────────────────────── */}
-      <section ref={heroRef} className="ab-hero">
+      <section ref={heroRef} className="ab-hero ab-hero--scene">
+
+        {/* Live 3D backdrop: a minka at dusk */}
+        <div className="ab-scene" aria-hidden>
+          <HeroScene heroRef={heroRef} compose="center" />
+          <div className="ab-scene-scrim" />
+        </div>
 
         {/* Decorative SVG background lines */}
         <svg className="ab-hero-svg" aria-hidden viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">

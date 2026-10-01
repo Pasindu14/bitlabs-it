@@ -1,277 +1,234 @@
 'use client'
-import { Fragment, useRef, useEffect } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { motion } from 'framer-motion'
 
 /* ------------------------------------------------------------------ *
- * Trust — "The Proof Ledger"
+ * Trust — "Proof, in bits"
  *
- * A light, editorial credibility section. Instead of a flat stat grid,
- * the metrics are a numbered ledger that visibly *tallies up* as the
- * section enters view. Two signature moments:
- *   1. A scroll-scrubbed reading highlight on the value statement
- *      (words shift muted -> ink / orange as you scroll through).
- *   2. The ledger: each row's number rises from behind a mask and
- *      counts up while its connector rule draws and dividers wipe in.
+ * A pinned, scroll-scrubbed stage. One field of glowing cubes (Three.js,
+ * a single InstancedMesh) rebuilds itself for every number:
+ *   80+  projects   → a skyline that grows tower by tower
+ *   45+  businesses → a constellation joined by strings of bits
+ *   7    years      → growth rings, one per year
+ *   99%  on-time    → a gauge that fills, one segment left empty
+ * The ledger on the left tallies live with the scene. Nothing is stored
+ * between frames, so scrubbing backwards un-builds it.
  *
- * Everything is server-rendered as readable static HTML; motion is a
- * progressive enhancement layered on from this Client Component, and is
- * fully replaced under reduced-motion.
+ * The copy and numbers are real HTML (screen-reader text included); the
+ * 3D scene is a progressive enhancement that is skipped if WebGL is absent.
  * ------------------------------------------------------------------ */
 
-const stats = [
-  { to: 80, suffix: '+', label: 'Projects delivered across web, mobile & AI' },
-  { to: 45, suffix: '+', label: 'Businesses served in Sri Lanka & beyond' },
-  { to: 7, suffix: '', label: 'Years building production software' },
-  { to: 99, suffix: '%', label: 'On-time delivery & client retention' },
+const ProofScene = dynamic(() => import('./hero3d/proof/ProofScene'), { ssr: false })
+
+const STATS = [
+  { to: 80, suffix: '+', label: 'Projects delivered across web, mobile & AI', note: 'Every tower is a product we shipped.' },
+  { to: 45, suffix: '+', label: 'Businesses served in Sri Lanka & beyond', note: 'Each node is a business. Each line, a working relationship.' },
+  { to: 7, suffix: '', label: 'Years building production software', note: 'One ring for every year in production.' },
+  { to: 99, suffix: '%', label: 'On-time delivery & client retention', note: 'We ship when we say we will — and clients stay.' },
 ]
 
-// Value statement, tokenised for the scroll reading-highlight.
-// Words in ACCENT settle to orange; the rest settle to full ink.
 const statement =
   'From first-time founders to established enterprises, teams choose us to design, build and ship software that performs in production.'
 const ACCENT = new Set(['founders', 'enterprises,', 'ship', 'production.'])
-const statementWords = statement.split(' ')
+const words = statement.split(' ')
 
-const MUTED = 'rgba(17,17,17,0.28)'
-const INK = '#111111'
-const ORANGE = '#FF4D00'
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v))
+const smooth = (a, b, v) => {
+  const t = clamp((v - a) / (b - a))
+  return t * t * (3 - 2 * t)
+}
 
 export function Trust() {
   const root = useRef(null)
+  const stage = useRef(null)
+  const state = useMemo(() => ({ s: 0 }), [])
+  const [active, setActive] = useState(0)
 
   useEffect(() => {
-    let cancelled = false
-    let ctx
-    let glowTween = null
-    let onVisibility = null
+    const rootEl = root.current
+    if (!rootEl) return
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const nums = Array.from(rootEl.querySelectorAll('[data-num]'))
+    const rows = Array.from(rootEl.querySelectorAll('[data-row]'))
+    const hl = Array.from(rootEl.querySelectorAll('[data-hl]'))
+    const fill = rootEl.querySelector('[data-rail-fill]')
+    const hint = rootEl.querySelector('[data-hint]')
 
-    async function init() {
-      const gsapModule = await import('gsap')
-      const gsap = gsapModule.gsap || gsapModule.default
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-      gsap.registerPlugin(ScrollTrigger)
-      if (cancelled || !root.current) return
+    let target = 0
+    let raf = 0
+    let last = 0
+    let running = false
+    let lastIdx = -1
+    let lastLit = -1
+    const shown = STATS.map(() => -1)
 
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      const el = (sel) => root.current.querySelector(sel)
-      const all = (sel) => Array.from(root.current.querySelectorAll(sel))
+    const measure = () => {
+      const r = rootEl.getBoundingClientRect()
+      const total = Math.max(1, r.height - window.innerHeight)
+      target = clamp(-r.top / total) * 4
+    }
 
-      // Reduced motion: settle the highlight to its final colours and leave
-      // every other element in its already-visible markup state.
-      if (prefersReduced) {
-        all('[data-hl]').forEach((w) => {
-          w.style.color = w.dataset.accent === '1' ? ORANGE : INK
-        })
-        return
+    const paint = () => {
+      const s = Number.isFinite(state.s) ? state.s : 0
+      const idx = clamp(Math.floor(s), 0, 3)
+      const tt = s - idx
+      STATS.forEach((st, i) => {
+        const g = i < idx ? 1 : i === idx ? smooth(0, 0.55, tt) : 0
+        const v = Math.round(st.to * g)
+        if (v !== shown[i]) {
+          shown[i] = v
+          nums[i].firstChild.nodeValue = v
+        }
+      })
+      if (idx !== lastIdx) {
+        lastIdx = idx
+        rows.forEach((r, i) => r.classList.toggle('is-active', i === idx))
+        setActive(idx)
       }
-
-      ctx = gsap.context(() => {
-        const mobile = window.matchMedia('(max-width: 767px)').matches
-        const dist = mobile ? 14 : 26
-        const countDur = mobile ? 1.0 : 1.4
-
-        /* -------- Signature 1: scroll reading-highlight -------- */
-        const words = all('[data-hl]')
-        gsap.set(words, { color: MUTED })
-        words.forEach((w) => {
-          const target = w.dataset.accent === '1' ? ORANGE : INK
-          gsap.to(w, {
-            color: target,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: w,
-              start: 'top 78%',
-              end: 'top 46%',
-              scrub: true,
-            },
-          })
-        })
-
-        /* -------- Ambient glow drift (Pattern 20) -------- */
-        const glow = el('[data-glow]')
-        if (glow) {
-          glowTween = gsap.to(glow, {
-            yPercent: -16,
-            xPercent: 8,
-            opacity: 0.85,
-            duration: 7,
-            ease: 'sine.inOut',
-            repeat: -1,
-            yoyo: true,
-          })
-
-          let inView = false
-          const updateGlow = () => {
-            if (!glowTween) return
-            if (inView && !document.hidden) glowTween.play()
-            else glowTween.pause()
-          }
-          ScrollTrigger.create({
-            trigger: root.current,
-            start: 'top bottom',
-            end: 'bottom top',
-            onToggle: (self) => {
-              inView = self.isActive
-              updateGlow()
-            },
-          })
-          onVisibility = updateGlow
-          document.addEventListener('visibilitychange', onVisibility)
-        }
-
-        /* -------- Entrance: headline + tallying ledger -------- */
-        let hasRun = false
-        const runEntrance = () => {
-          if (hasRun) return
-          hasRun = true
-
-          const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
-
-          tl.from(el('[data-eyebrow]'), { autoAlpha: 0, y: dist * 0.55, duration: 0.5 })
-            // Pattern 02 — masked headline lines rise from behind the mask.
-            .from(
-              all('[data-line]'),
-              { yPercent: 115, duration: 0.72, stagger: 0.08 },
-              0.06
-            )
-            // Top border of the ledger draws across.
-            .from(
-              el('[data-ledger-top]'),
-              { scaleX: 0, duration: 0.7, ease: 'power2.inOut' },
-              0.36
-            )
-
-          // Each row tallies: index + label settle, connector draws, number
-          // rises from its mask and counts up, then the row divider wipes.
-          all('[data-row]').forEach((row, i) => {
-            const at = 0.5 + i * (mobile ? 0.14 : 0.11)
-            const index = row.querySelector('[data-index]')
-            const numMask = row.querySelector('[data-num]')
-            const numVal = row.querySelector('[data-num-val]')
-            const connector = row.querySelector('[data-connector]')
-            const label = row.querySelector('[data-label]')
-            const divider = row.querySelector('[data-divider]')
-            const to = Number(numVal.dataset.to || 0)
-            const proxy = { v: 0 }
-
-            numVal.firstChild.nodeValue = '0'
-
-            tl.from(index, { autoAlpha: 0, x: -10, duration: 0.5 }, at)
-              .from(numMask, { yPercent: 105, autoAlpha: 0, duration: 0.6 }, at + 0.02)
-              .to(
-                proxy,
-                {
-                  v: to,
-                  duration: countDur,
-                  ease: 'power2.out',
-                  snap: { v: 1 },
-                  onUpdate: () => {
-                    numVal.firstChild.nodeValue = Math.round(proxy.v)
-                  },
-                },
-                at + 0.02
-              )
-              .from(
-                connector,
-                { scaleX: 0, duration: 0.7, ease: 'power2.inOut' },
-                at + 0.06
-              )
-              .from(label, { autoAlpha: 0, y: dist * 0.45, duration: 0.5 }, at + 0.14)
-              .from(
-                divider,
-                { scaleX: 0, duration: 0.6, ease: 'power2.inOut' },
-                at + 0.2
-              )
-          })
-        }
-
-        // Fire once when the section enters the viewport.
-        ScrollTrigger.create({
-          trigger: root.current,
-          start: 'top 82%',
-          once: true,
-          onEnter: runEntrance,
-        })
-
-        // If the section is already in/above the viewport on load (deep link,
-        // fast scroll), run immediately so the entrance is never skipped.
-        const rect = root.current.getBoundingClientRect()
-        if (rect.top < window.innerHeight * 0.82) runEntrance()
-      }, root)
+      // reading highlight over the first stretch of the scroll
+      const lit = Math.floor(clamp(s / 0.7) * hl.length)
+      if (lit !== lastLit) {
+        lastLit = lit
+        hl.forEach((w, i) => w.classList.toggle('on', i < lit))
+      }
+      if (fill) fill.style.transform = `scaleY(${(s / 4).toFixed(4)})`
+      if (hint) hint.style.opacity = s > 0.05 ? '0' : '1'
     }
 
-    init()
+    const frame = (now) => {
+      if (!running) return
+      raf = requestAnimationFrame(frame)
+      const dt = Math.min(0.05, (now - last) / 1000)
+      last = now
+      measure()
+      state.s = reduced ? target : state.s + (target - state.s) * (1 - Math.exp(-dt * 7))
+      paint()
+    }
+    const start = () => {
+      if (running) return
+      running = true
+      last = performance.now()
+      raf = requestAnimationFrame(frame)
+    }
+    const stop = () => {
+      running = false
+      cancelAnimationFrame(raf)
+    }
 
+    measure()
+    state.s = target
+    paint()
+
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? start() : stop()), {
+      rootMargin: '25% 0px 25% 0px',
+    })
+    io.observe(rootEl)
+    const inRange = () => {
+      const r = rootEl.getBoundingClientRect()
+      return r.bottom > -window.innerHeight * 0.25 && r.top < window.innerHeight * 1.25
+    }
+    const onVis = () => (document.hidden || !inRange() ? stop() : start())
+    document.addEventListener('visibilitychange', onVis)
     return () => {
-      cancelled = true
-      if (onVisibility) document.removeEventListener('visibilitychange', onVisibility)
-      if (glowTween) glowTween.kill()
-      if (ctx) ctx.revert()
+      stop()
+      io.disconnect()
+      document.removeEventListener('visibilitychange', onVis)
     }
-  }, [])
+  }, [state])
 
   return (
-    <section className="trust section-pad" id="trust" ref={root}>
-      <div className="trust-glow" data-glow aria-hidden="true" />
-      <div className="wrap">
-        <div className="trust-head">
-          <div className="trust-head-lead">
-            <span className="eyebrow" data-eyebrow>
-              Trusted partner
-            </span>
-            <h2 className="h2 trust-title">
-              <span className="line-mask">
-                <span data-line>Trusted by businesses in</span>
-              </span>
-              <span className="line-mask">
-                <span data-line>
-                  Sri Lanka <em className="italic-accent">and beyond.</em>
-                </span>
-              </span>
-            </h2>
-          </div>
+    <section className="proof" id="trust" ref={root}>
+      <div className="proof-stick" ref={stage}>
+        <div className="proof-bg" aria-hidden="true" />
+        <ProofScene stageRef={stage} rootRef={root} state={state} />
+        <div className="proof-scrim" aria-hidden="true" />
 
-          <p className="trust-statement">
-            {statementWords.map((word, i) => (
-              <Fragment key={i}>
-                <span data-hl data-accent={ACCENT.has(word) ? '1' : '0'}>
-                  {word}
+        <div className="wrap proof-inner">
+          <div className="proof-copy">
+            <motion.span
+              className="eyebrow"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              Trusted partner
+            </motion.span>
+
+            {/* Trigger sits on the unclipped h2; the masked lines inherit its variants. */}
+            <motion.h2
+              className="h2 proof-title"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } } }}
+            >
+              {['Trusted by businesses in', 'Sri Lanka and beyond.'].map((line, i) => (
+                <span className="line-mask" key={i}>
+                  <motion.span
+                    variants={{
+                      hidden: { y: '115%' },
+                      show: { y: '0%', transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] } },
+                    }}
+                  >
+                    {i === 1 ? (
+                      <>
+                        Sri Lanka <em className="italic-accent">and beyond.</em>
+                      </>
+                    ) : (
+                      line
+                    )}
+                  </motion.span>
                 </span>
-                {i < statementWords.length - 1 ? ' ' : ''}
-              </Fragment>
-            ))}
-          </p>
+              ))}
+            </motion.h2>
+
+            <p className="proof-statement">
+              {words.map((w, i) => (
+                <Fragment key={i}>
+                  <span data-hl className={ACCENT.has(w) ? 'accent' : ''}>
+                    {w}
+                  </span>
+                  {i < words.length - 1 ? ' ' : ''}
+                </Fragment>
+              ))}
+            </p>
+
+            <div className="proof-ledger" role="list">
+              {STATS.map((s, i) => (
+                <div className={'proof-row' + (i === 0 ? ' is-active' : '')} data-row role="listitem" key={i}>
+                  <span className="sr-only">
+                    {s.to}
+                    {s.suffix} — {s.label}
+                  </span>
+                  <span className="proof-idx" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="proof-num" aria-hidden="true">
+                    <span data-num>0</span>
+                    {s.suffix && <span className="proof-suffix">{s.suffix}</span>}
+                  </span>
+                  <span className="proof-label" aria-hidden="true">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="ledger">
-          <span className="ledger-top" data-ledger-top aria-hidden="true" />
-          {stats.map((s, i) => (
-            <div className="ledger-row" data-row key={i}>
-              <span className="ledger-index" data-index>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-
-              <span className="ledger-num-wrap">
-                <span className="ledger-num-mask">
-                  <span className="ledger-num" data-num>
-                    <span className="ledger-num-val" data-num-val data-to={s.to}>
-                      {s.to}
-                    </span>
-                    {s.suffix && <span className="ledger-suffix">{s.suffix}</span>}
-                  </span>
-                </span>
-              </span>
-
-              <span className="ledger-connector" aria-hidden="true">
-                <span className="ledger-connector-fill" data-connector />
-              </span>
-
-              <span className="ledger-label" data-label>
-                {s.label}
-              </span>
-
-              <span className="ledger-divider" data-divider aria-hidden="true" />
-            </div>
-          ))}
+        <div className="proof-note" aria-hidden="true">
+          <span className="proof-note-k">0{(STATS[active] ? active : 0) + 1} / 04</span>
+          <span className="proof-note-t" key={active}>
+            {(STATS[active] || STATS[0]).note}
+          </span>
+        </div>
+        <span className="proof-hint" data-hint aria-hidden="true">
+          Scroll to build
+        </span>
+        <div className="proof-rail" aria-hidden="true">
+          <span data-rail-fill />
         </div>
       </div>
     </section>
