@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { Magnetic } from './Magnetic'
 import { ArrowR } from './ArrowR'
-import { Marquee } from './Marquee'
 
 // "Bit by Bit": thousands of cubes that assemble into what we build. Client-only and heavy —
 // keep it out of the server render and the first paint.
@@ -128,8 +127,6 @@ export function Hero() {
         </div>
       </motion.div>
 
-      {/* Service ticker lives on the hero's bottom edge */}
-      <Marquee />
     </header>
   )
 }

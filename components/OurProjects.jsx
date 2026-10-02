@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Reveal } from './Reveal'
 import { ArrowR } from './ArrowR'
-import { projects, STATUS } from './projectsData'
+import { projects as allProjects, STATUS } from './projectsData'
+
+// Home page shows the strongest five; the full list stays in projectsData.js
+const FEATURED = ['hris', 'sfa', 'whatsapp-crm', 'erp-system', 'concentration-gym']
+const projects = FEATURED.map((id) => allProjects.find((p) => p.id === id)).filter(Boolean)
 
 /* ------------------------------------------------------------------ *
  * Our Projects — "Product Lab"

@@ -38,10 +38,8 @@ export function Footer() {
           <div>
             <h4>Company</h4>
             <div className="footer-links">
-              <a href="#why">Why Bitlabs</a>
               <a href="#process">Process</a>
               <a href="#projects">Projects</a>
-              <a href="#testimonials">Work</a>
               <a href="#contact">Contact</a>
             </div>
           </div>

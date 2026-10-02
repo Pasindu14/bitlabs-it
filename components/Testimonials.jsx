@@ -7,24 +7,12 @@ import { Reveal } from './Reveal'
 const GlobeScene = dynamic(() => import('./hero3d/globe/GlobeScene'), { ssr: false })
 
 const items = [
-  { quote: 'Bitlabs took our messy internal process and turned it into software our whole team actually enjoys using. Genuinely the most reliable dev partner we\'ve worked with.', name: 'Nimal Perera', initials: 'NP', bg: 'dark' },
-  { quote: 'Shipped our app ahead of schedule and the quality was outstanding. Clean code, clear communication.', name: 'Sarah Chen', initials: 'SC' },
-  { quote: 'The AI integration they built saves us hours every day. Smart team, no over-engineering.', name: 'Ravi Kumar', initials: 'RK', bg: 'orange' },
-  { quote: 'Beautiful UI and rock-solid performance. They cared about the details we didn\'t even think of.', name: 'Amaya Silva', initials: 'AS' },
-  { quote: 'They understood exactly what we needed and delivered without back-and-forth. Refreshingly straightforward.', name: 'Dinesh Jayawardena', initials: 'DJ', bg: 'dark' },
-  { quote: 'Our mobile app went from concept to App Store in 10 weeks. Fast, responsive and professional throughout.', name: 'Priya Ratnayake', initials: 'PR' },
-  { quote: 'Best decision we made was outsourcing our platform to Bitlabs. It scales beautifully and the code is clean.', name: 'Marcus Webb', initials: 'MW', bg: 'orange' },
-  { quote: 'They built something we didn\'t think was possible in our budget. Would recommend without hesitation.', name: 'Kasun Fernando', initials: 'KF' },
-  { quote: 'The attention to UX detail set them apart from every other agency we\'ve used. Users absolutely love it.', name: 'Tharushi Wickramasinghe', initials: 'TW', bg: 'dark' },
-  { quote: 'Pasi and the team delivered exactly what we envisioned — on time, on budget, and with zero drama. Exceptional work.', name: 'Pete Fry', initials: 'PF', bg: 'orange' },
   { quote: 'Came back a second time because the first project was that good. Consistent quality, great communication every step of the way.', name: 'anthonybbaer', initials: 'AB' },
   { quote: 'High-value project handled with complete professionalism. Delivered exactly to spec and went the extra mile without being asked.', name: 'juliantrading', initials: 'JT', bg: 'dark' },
   { quote: 'Impressive output for a complex build. The work was clean, well-structured, and finished ahead of time. Left a tip because it deserved one.', name: 'leonsceco', initials: 'LS', bg: 'orange' },
-  { quote: 'Largest project I\'ve commissioned on Fiverr and it was handled better than any agency I\'ve worked with. Will absolutely be back.', name: 'taraslucysyn', initials: 'TL' },
   { quote: 'Solid execution on a detailed brief. The app worked first try, no revisions needed. Rare to find that level of precision.', name: 'o3books', initials: 'OB', bg: 'dark' },
   { quote: 'Dependable, talented, and fast. Came back multiple times and the standard never dropped once.', name: 'typeseo', initials: 'TS' },
   { quote: 'Trusted this developer with a substantial budget and it paid off completely. Exceptional value and craftsmanship.', name: 'john3m', initials: 'JM', bg: 'orange' },
-  { quote: 'Kept coming back because every single delivery was clean, on time and better than expected. A genuinely rare find on any platform.', name: 'alessandrobu576', initials: 'AL' },
 ]
 
 export function Testimonials() {
