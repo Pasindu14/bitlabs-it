@@ -206,7 +206,8 @@ export function Trust() {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="proof-num" aria-hidden="true">
-                    <span data-num>0</span>
+                    {/* Real value in server HTML (crawlers, previews, no-JS); paint() resets it to the scroll state on mount. */}
+                    <span data-num>{s.to}</span>
                     {s.suffix && <span className="proof-suffix">{s.suffix}</span>}
                   </span>
                   <span className="proof-label" aria-hidden="true">

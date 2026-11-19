@@ -47,7 +47,7 @@ export function Footer() {
             <h4>Studio</h4>
             <div className="footer-links">
               <a href="mailto:bitlabs.solutions@gmail.com">bitlabs.solutions@gmail.com</a>
-              <a href="https://wa.me/94000000000">WhatsApp chat</a>
+              <a href="https://wa.me/94711803296">WhatsApp chat</a>
               <a href="https://www.facebook.com/BitlabsLtd/" target="_blank" rel="noopener noreferrer">Facebook</a>
             </div>
           </div>
